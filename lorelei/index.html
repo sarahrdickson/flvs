@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lorelei's Weekly FLVS Dashboard · Nov 2 – Nov 8, 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Outfit', sans-serif],
+            sans: ['DM Sans', sans-serif],
+            mono: ["'JetBrains Mono'", 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --bg-dark: #0c1917;
+      --card-dark: #122421;
+      --border-dark: #1e3a34;
+      --primary: #34d399;
+    }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      font-variant-numeric: tabular-nums;
+    }
+    html.dark body {
+      background-color: var(--bg-dark);
+      color: #f1f5f9;
+    }
+    html:not(.dark) body {
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    html.dark .surface-card {
+      background-color: var(--card-dark);
+      border-color: var(--border-dark);
+    }
+    html:not(.dark) .surface-card {
+      background-color: #ffffff;
+      border-color: #e2e8f0;
+    }
+    html.dark .surface-sub {
+      background-color: rgba(15, 23, 42, 0.65);
+      border-color: rgba(51, 65, 85, 0.6);
+    }
+    html:not(.dark) .surface-sub {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+    .task-row {
+      transition: all 150ms ease-out;
+    }
+    .task-row:active {
+      transform: scale(0.995);
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased selection:bg-sky-500/30 pb-16">
+
+  <!-- Top Navigation & Status Bar -->
+  <header class="sticky top-0 z-30 backdrop-blur-md bg-slate-950/85 dark:bg-slate-950/85 border-b border-slate-800/80 text-slate-100">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg flex items-center justify-center border bg-emerald-500/15 text-emerald-300 border-emerald-500/30">
+          <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <h1 class="font-display text-lg sm:text-xl font-bold tracking-tight text-white">
+              Lorelei's Weekly FLVS Game Plan
+            </h1>
+            <span class="text-xs font-mono px-2 py-0.5 rounded border bg-emerald-500/15 text-emerald-300 border-emerald-500/30">
+              Week of Nov 2 – Nov 8, 2026
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 font-mono">
+            FLVS User: <strong class="text-slate-200">LAD11</strong> · Grade 10 · Gradebook Synced: 2026-11-04 14:40:41
+          </p>
+        </div>
+      </div>
+
+      <!-- Cloud Sync Indicator & Quick Actions -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <div id="sync-badge" class="flex items-center gap-1.5 text-xs font-mono px-2.5 py-1.5 rounded-md bg-slate-900 border border-slate-700 text-emerald-400">
+          <span id="sync-dot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span id="sync-text">☁️ Cloud Auto-Save Ready</span>
+        </div>
+
+        <button onclick="manualCloudSync()" title="Force Save & Sync Now"
+          class="text-xs font-medium px-2.5 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1.5 transition-all active:scale-95">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span>Sync</span>
+        </button>
+
+        <button onclick="copyWeeklySummary()" title="Copy Markdown Summary of My Week"
+          class="text-xs font-medium px-2.5 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1.5 transition-all active:scale-95">
+          <i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i>
+          <span id="copy-summary-label">Copy Summary</span>
+        </button>
+
+        <button onclick="toggleTheme()" title="Toggle Light / Dark Mode"
+          class="p-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all active:scale-95">
+          <i data-lucide="sun-moon" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 pt-6 space-y-6">
+
+    <!-- STEP 1: FLVS VSA Login Launch Bar + Weekly EOW Progress Tracker -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <!-- Step 1 Login Card -->
+      <div class="lg:col-span-5 surface-card border rounded-xl p-4 flex flex-col justify-between gap-3">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <span class="inline-flex items-center gap-1 text-xs font-mono font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded mb-1.5">
+              🔐 STEP 1 BEFORE CLICKING CLASSES
+            </span>
+            <h2 class="font-display text-base font-bold">Sign In to FLVS VSA Portal First</h2>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+              Sign in at <strong>vsa.flvs.net</strong> as <code class="font-mono text-slate-200 bg-slate-800 px-1.5 py-0.5 rounded">LAD11</code> first. Once signed in, all direct <strong>Course Home</strong> &amp; <strong>Gradebook</strong> buttons below open straight to your class!
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 pt-1">
+          <a href="https://vsa.flvs.net/" target="_blank" rel="noopener"
+            class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs sm:text-sm py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+            <i data-lucide="log-in" class="w-4 h-4"></i>
+            <span>Open FLVS VSA Login (LAD11)</span>
+            <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-80"></i>
+          </a>
+          <button onclick="copyText('LAD11', 'Copied username LAD11!')"
+            class="text-xs font-mono px-3 py-2.5 rounded-lg surface-sub border hover:border-slate-500 flex items-center gap-1.5 transition-all active:scale-95"
+            title="Copy FLVS Username">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span>LAD11</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Weekly EOW Progress Counter & Filter Bar -->
+      <div class="lg:col-span-7 surface-card border rounded-xl p-4 flex flex-col justify-between gap-3">
+        <div>
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <div>
+              <h2 class="font-display text-base font-bold">End-of-Week Target Checklist Progress</h2>
+              <p class="text-xs text-slate-400">
+                Manage your own schedule—just check off all weekly target items by Sunday night!
+              </p>
+            </div>
+            <div class="text-right">
+              <span id="progress-fraction" class="font-mono text-xl sm:text-2xl font-bold text-white">0 / 0</span>
+              <span id="progress-percent" class="block text-xs font-mono text-emerald-400">0% Done</span>
+            </div>
+          </div>
+          <!-- Progress Bar -->
+          <div class="w-full h-3 bg-slate-800 rounded-full overflow-hidden border border-slate-700/80 p-0.5">
+            <div id="progress-bar-fill" class="h-full bg-emerald-400 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Filter Pills & Schedule Alerts -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-800/80">
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs text-slate-400 mr-1">Show:</span>
+            <button onclick="setFilter('all')" id="filter-all"
+              class="text-xs px-2.5 py-1 rounded-md font-medium bg-slate-800 text-white border border-slate-600 transition-all">
+              All Tasks
+            </button>
+            <button onclick="setFilter('todo')" id="filter-todo"
+              class="text-xs px-2.5 py-1 rounded-md font-medium text-slate-400 hover:text-white border border-transparent transition-all">
+              To-Do Only
+            </button>
+            <button onclick="setFilter('done')" id="filter-done"
+              class="text-xs px-2.5 py-1 rounded-md font-medium text-slate-400 hover:text-white border border-transparent transition-all">
+              Completed
+            </button>
+          </div>
+          <a href="#notes-section" class="text-xs font-medium text-sky-400 hover:text-sky-300 flex items-center gap-1">
+            <i data-lucide="message-square-plus" class="w-3.5 h-3.5"></i>
+            <span>Jump to Weekly Notes / Ask Mom</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Upcoming Dates & Reminders Strip -->
+    <section class="surface-card border rounded-xl px-4 py-3">
+      <div class="flex items-center gap-2 text-xs font-semibold text-slate-300 mb-2">
+        <i data-lucide="calendar-clock" class="w-4 h-4 text-sky-400"></i>
+        <span>IMPORTANT DATES &amp; REMINDERS</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+        
+        <div class="surface-sub border rounded-lg px-3 py-2 text-xs">
+          <div class="font-mono font-semibold text-sky-300">This Week's Goal</div>
+          <div class="text-slate-300 mt-0.5 leading-snug">2 Geometry quizzes + 2 World History quizzes + Mrs. Buss Welcome Call!</div>
+        </div>
+        
+        <div class="surface-sub border rounded-lg px-3 py-2 text-xs">
+          <div class="font-mono font-semibold text-sky-300">Wed Nov 11</div>
+          <div class="text-slate-300 mt-0.5 leading-snug">Veterans Day — FLVS closed (courses stay open, teachers off)</div>
+        </div>
+        
+        <div class="surface-sub border rounded-lg px-3 py-2 text-xs">
+          <div class="font-mono font-semibold text-sky-300">Nov 21 – Nov 29</div>
+          <div class="text-slate-300 mt-0.5 leading-snug">Thanksgiving Break — Courses stay open, teachers off</div>
+        </div>
+        
+      </div>
+    </section>
+
+    <!-- 4 Course Cards Grid -->
+    <section id="courses-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <!-- Rendered dynamically by JS from COURSE_CONFIG -->
+    </section>
+
+    <!-- Bottom General Weekly Notes / Questions & Activity Log -->
+    <section id="notes-section" class="surface-card border rounded-xl p-5 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 class="font-display text-lg font-bold flex items-center gap-2">
+            <i data-lucide="notebook-pen" class="w-5 h-5 text-sky-400"></i>
+            <span>Weekly Notes, Questions &amp; Check-In for Mom</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">
+            Anything you type here or in the course boxes above is automatically saved to the cloud and backed up to Markdown before next week's reset.
+          </p>
+        </div>
+        <span id="notes-save-indicator" class="text-xs font-mono text-emerald-400">☁️ Auto-saved</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <!-- Main Scratchpad -->
+        <div class="lg:col-span-7 space-y-2">
+          <label for="general-notes-input" class="block text-xs font-semibold text-slate-300">
+            📝 General Weekly Scratchpad / Questions / What I Need Help With:
+          </label>
+          <textarea id="general-notes-input" rows="4"
+            placeholder="Type any notes, questions for Mom or teachers, or updates on your week here..."
+            oninput="onGeneralNotesInput(this.value)"
+            class="w-full rounded-lg surface-sub border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-100 placeholder-slate-500"></textarea>
+        </div>
+
+        <!-- Quick Timestamped Log Adder -->
+        <div class="lg:col-span-5 flex flex-col justify-between space-y-2">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">
+              🕒 Quick Check-In Log (Saves Timestamped Entry):
+            </label>
+            <div class="flex gap-2">
+              <select id="log-course-select" class="rounded-lg surface-sub border px-2.5 py-2 text-xs font-medium text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                <option value="General">General</option>
+                <option value="Geometry">Geometry</option><option value="World History">World History</option><option value="Earth/Space Science">Earth/Space Science</option><option value="English 2">English 2</option>
+              </select>
+              <input id="log-text-input" type="text"
+                placeholder="e.g. Finished 01.11 exam! / Booked DBA for Thu 2pm"
+                onkeydown="if(event.key==='Enter') addLogEntry()"
+                class="flex-1 rounded-lg surface-sub border px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+              <button onclick="addLogEntry()"
+                class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs px-3 py-2 rounded-lg shrink-0 transition-all active:scale-95">
+                Add Note
+              </button>
+            </div>
+          </div>
+
+          <div id="log-entries-container" class="surface-sub border rounded-lg p-2.5 max-h-32 overflow-y-auto space-y-1.5 text-xs font-mono">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden bg-slate-900 border border-slate-700 text-slate-100 px-4 py-2.5 rounded-lg shadow-xl text-xs font-mono flex items-center gap-2">
+    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toast-msg">Saved!</span>
+  </div>
+
+  <script>
+    const CONFIG = {
+  "key": "lorelei",
+  "name": "Lorelei",
+  "full_name": "Lorelei Dickson",
+  "grade_level": "Grade 10",
+  "username": "LAD11",
+  "week_id": "2026-11-02",
+  "week_range": "Nov 2 – Nov 8, 2026",
+  "kv_key": "lorelei_2026-11-02",
+  "theme": "emerald",
+  "schedule_alerts": [
+    {
+      "date": "This Week's Goal",
+      "text": "2 Geometry quizzes + 2 World History quizzes + Mrs. Buss Welcome Call!"
+    },
+    {
+      "date": "Wed Nov 11",
+      "text": "Veterans Day — FLVS closed (courses stay open, teachers off)"
+    },
+    {
+      "date": "Nov 21 – Nov 29",
+      "text": "Thanksgiving Break — Courses stay open, teachers off"
+    }
+  ],
+  "courses": [
+    {
+      "id": "7152",
+      "name": "Geometry",
+      "segment": "Segment 1",
+      "icon": "compass",
+      "accent": "emerald",
+      "status_badge": "🟢 Active & Rolling",
+      "status_tone": "success",
+      "grade": "80.00% (B)",
+      "percent": "2.27%",
+      "done_str": "1 / 44 (43 left)",
+      "teacher_name": "Mr. Verlin Cox",
+      "teacher_wikilink": "[[People/Verlin Cox|Mr. Verlin Cox]]",
+      "teacher_phone": "386-361-4494",
+      "teacher_email": "vcox@flvs.net",
+      "dba_url": "",
+      "dba_label": "Call/Text 386-361-4494 for Help/DBA",
+      "course_url": "https://learn.flvs.net/educator/observer/announcements.cgi?vcox13*lad11*slt=9VmNeToas2zDg*7152",
+      "grades_url": "https://learn.flvs.net/educatorng/student/vcox13/7152/lad11/grade-report",
+      "passwords": [],
+      "teacher_note": "Awesome job getting started with an 80% (B) on 01.01 Basics of Geometry! Note: Lesson 01.03 is Honors-only, so you skip right from 01.02 to 01.04.",
+      "weekly_tasks": [
+        {
+          "id": "geom_01_02",
+          "code": "01.02",
+          "title": "[2] 01.02 Basic Constructions",
+          "type": "Quiz",
+          "badge": "Weekly Target #1",
+          "priority": true,
+          "flvs_done": null
+        },
+        {
+          "id": "geom_01_04",
+          "code": "01.04",
+          "title": "[4] 01.04 Logical Reasoning",
+          "type": "Quiz",
+          "badge": "Weekly Target #2 (01.03 is Honors-only)",
+          "priority": false,
+          "flvs_done": null
+        }
+      ],
+      "next_up": [
+        {
+          "id": "geom_01_05",
+          "code": "01.05",
+          "title": "[5] 01.05 Geometry Foundations DBA",
+          "type": "DBA 1",
+          "flvs_done": null
+        },
+        {
+          "id": "geom_01_06",
+          "code": "01.06",
+          "title": "[6] 01.06 Working with Coordinates",
+          "type": "Quiz",
+          "flvs_done": null
+        },
+        {
+          "id": "geom_01_07",
+          "code": "01.07",
+          "title": "[7] 01.07 Introduction to Proofs",
+          "type": "Quiz",
+          "flvs_done": null
+        }
+      ]
+    },
+    {
+      "id": "6648",
+      "name": "World History",
+      "segment": "Segment 1",
+      "icon": "globe-2",
+      "accent": "teal",
+      "status_badge": "🟢 Newly Activated (11/02) — Start Mod 1",
+      "status_tone": "info",
+      "grade": "No grades yet",
+      "percent": "0.00%",
+      "done_str": "0 / 38 (38 left)",
+      "teacher_name": "Mrs. Alexa Purkiss",
+      "teacher_wikilink": "[[People/Alexa Purkiss|Mrs. Alexa Purkiss]]",
+      "teacher_phone": "407-476-8467",
+      "teacher_email": "apurkiss@flvs.net",
+      "dba_url": "https://bookings.cloud.microsoft/bookwithme/user/3a849eb977e14db5a7e09d1a848d9542%40flvs.net?anonymous&ismsaljsauthenabled",
+      "dba_label": "Book Call (Microsoft Bookings)",
+      "course_url": "https://learn.flvs.net/educator/observer/announcements.cgi?apurkiss1*lad11*slt=9VmNeToas2zDg*6648",
+      "grades_url": "https://learn.flvs.net/educatorng/student/apurkiss1/6648/lad11/grade-report",
+      "passwords": [],
+      "teacher_note": "Mrs. Purkiss activated your course on 11/02! Submitting 01.01 and 01.02 this week will put you right on pace and clear the automated 1-week pace notice.",
+      "weekly_tasks": [
+        {
+          "id": "wh_01_01",
+          "code": "01.01",
+          "title": "[1] 01.01 Roman Empire to 500 CE",
+          "type": "Quiz",
+          "badge": "First Submission · Clears Pace Alert!",
+          "priority": true,
+          "flvs_done": null
+        },
+        {
+          "id": "wh_01_02",
+          "code": "01.02",
+          "title": "[2] 01.02 Monotheistic Religions",
+          "type": "Quiz",
+          "badge": "Weekly Target #2",
+          "priority": false,
+          "flvs_done": null
+        }
+      ],
+      "next_up": [
+        {
+          "id": "wh_01_03",
+          "code": "01.03",
+          "title": "[3] 01.03 The Expansion of Islam",
+          "type": "Quiz",
+          "flvs_done": null
+        },
+        {
+          "id": "wh_01_04",
+          "code": "01.04",
+          "title": "[4] 01.04 The Golden Age of Islam",
+          "type": "Written Assignment",
+          "flvs_done": null
+        },
+        {
+          "id": "wh_01_05",
+          "code": "01.05",
+          "title": "[5] 01.05 The Byzantines",
+          "type": "Quiz",
+          "flvs_done": null
+        }
+      ]
+    },
+    {
+      "id": "6483",
+      "name": "Earth/Space Science",
+      "segment": "Segment 1",
+      "icon": "orbit",
+      "accent": "amber",
+      "status_badge": "⏳ Classroom Assigned — Welcome Call Needed",
+      "status_tone": "warning",
+      "grade": "Classroom Assigned",
+      "percent": "0.00%",
+      "done_str": "0 / 39 (39 left)",
+      "teacher_name": "Mrs. Nicole Buss",
+      "teacher_wikilink": "[[People/Nicole Buss|Mrs. Nicole Buss]]",
+      "teacher_phone": "561-510-1132",
+      "teacher_email": "nbuss@flvs.net",
+      "dba_url": "https://tinyurl.com/ESSMrsBuss",
+      "dba_label": "Book Welcome Call (tinyurl.com/ESSMrsBuss)",
+      "course_url": "https://learn.flvs.net/educator/observer/announcements.cgi?nbuss*lad11*slt=9VmNeToas2zDg*6483",
+      "grades_url": "https://learn.flvs.net/educatorng/student/nbuss/6483/lad11/grade-report",
+      "passwords": [],
+      "teacher_note": "Your classroom is ready! Click 'Book Welcome Call' above (or text Mrs. Buss at 561-510-1132) to complete your quick welcome call and unlock Segment 1.",
+      "weekly_tasks": [
+        {
+          "id": "ess_welcome",
+          "code": "WELCOME",
+          "title": "Book & Complete Welcome Call with Mrs. Buss",
+          "type": "Onboarding Call",
+          "badge": "Unlocks Course · tinyurl.com/ESSMrsBuss",
+          "priority": true,
+          "flvs_done": null
+        }
+      ],
+      "next_up": [
+        {
+          "id": "ess_01_01",
+          "code": "01.01",
+          "title": "[1] 01.01 Welcome to Earth Space Science",
+          "type": "Quiz",
+          "flvs_done": null
+        },
+        {
+          "id": "ess_01_02",
+          "code": "01.02",
+          "title": "[2] 01.02 Scientific Investigation",
+          "type": "Quiz",
+          "flvs_done": null
+        },
+        {
+          "id": "ess_01_03",
+          "code": "01.03",
+          "title": "[3] 01.03 Theories and Laws",
+          "type": "Quiz",
+          "flvs_done": null
+        }
+      ]
+    },
+    {
+      "id": "6386",
+      "name": "English 2",
+      "segment": "Segment 1",
+      "icon": "feather",
+      "accent": "rose",
+      "status_badge": "⚠️ Withdrawn Status in VSA — Check Re-Activation",
+      "status_tone": "danger",
+      "grade": "Withdrawn 11/03",
+      "percent": "0.00%",
+      "done_str": "0 / 23 (23 left)",
+      "teacher_name": "Mr. Jesse Pierson",
+      "teacher_wikilink": "[[People/Jesse Pierson|Mr. Jesse Pierson]]",
+      "teacher_phone": "800-374-1430 (FLVS Support)",
+      "teacher_email": "jpierson21@learn.flvs.net",
+      "dba_url": "",
+      "dba_label": "Message Mr. Pierson in Educator LMS",
+      "course_url": "https://learn.flvs.net/educator/observer/announcements.cgi?jpierson21*lad11*slt=9VmNeToas2zDg*6386",
+      "grades_url": "https://learn.flvs.net/educatorng/student/jpierson21/6386/lad11/grade-report",
+      "passwords": [],
+      "teacher_note": "VSA listed English 2 as Withdrawn on 11/03 because coursework hadn't started yet, though the classroom (ID 6386) is still visible in Educator. Coordinate with Mom & Mr. Pierson to re-activate!",
+      "weekly_tasks": [
+        {
+          "id": "eng2_reactivate",
+          "code": "STATUS",
+          "title": "Check with Mom / Mr. Pierson to Re-Activate English 2",
+          "type": "Course Activation",
+          "badge": "Course ID 6386",
+          "priority": true,
+          "flvs_done": null
+        }
+      ],
+      "next_up": [
+        {
+          "id": "eng2_01_01",
+          "code": "01.01",
+          "title": "[2] 01.01 All About Words",
+          "type": "Quiz",
+          "flvs_done": null
+        },
+        {
+          "id": "eng2_01_02",
+          "code": "01.02",
+          "title": "[3] 01.02 Expressive Poetry",
+          "type": "Written Assignment",
+          "flvs_done": null
+        },
+        {
+          "id": "eng2_01_03",
+          "code": "01.03",
+          "title": "[4] 01.03 Pondering Poems' Meanings",
+          "type": "Quiz",
+          "flvs_done": null
+        }
+      ]
+    }
+  ]
+};
+    const SEED_STATE = {
+  "student": "lorelei",
+  "studentName": "Lorelei Dickson",
+  "weekId": "2026-11-02",
+  "updatedAt": "2026-11-04T23:19:48.685Z",
+  "checked": {
+    "geom_01_02": false,
+    "geom_01_04": false,
+    "geom_01_05": false,
+    "geom_01_06": false,
+    "geom_01_07": false,
+    "wh_01_01": false,
+    "wh_01_02": false,
+    "wh_01_03": false,
+    "wh_01_04": false,
+    "wh_01_05": false,
+    "ess_welcome": false,
+    "ess_01_01": false,
+    "ess_01_02": false,
+    "ess_01_03": false,
+    "eng2_reactivate": false,
+    "eng2_01_01": false,
+    "eng2_01_02": false,
+    "eng2_01_03": false
+  },
+  "courseNotes": {
+    "6386": "",
+    "6483": "",
+    "6648": "",
+    "7152": ""
+  },
+  "dbaDates": {
+    "6386": "",
+    "6483": "",
+    "6648": "",
+    "7152": ""
+  },
+  "generalNotes": "",
+  "noteLog": []
+};
+    const KV_URL = "https://kvdb.io/X8X3JYafoUfm6j9qA93Vzp/lorelei_2026-11-02";
+    const STORAGE_KEY = "flvs_weekly_state_" + CONFIG.kv_key;
+
+    let appState = JSON.parse(JSON.stringify(SEED_STATE));
+    let currentFilter = 'all';
+    let saveTimer = null;
+    let expandedQueues = {};
+
+    function loadInitialState() {
+      // 1. Check localStorage first
+      try {
+        const localRaw = localStorage.getItem(STORAGE_KEY);
+        if (localRaw) {
+          const localObj = JSON.parse(localRaw);
+          mergeIntoState(localObj);
+        }
+      } catch (e) {
+        console.warn("Local storage read error:", e);
+      }
+
+      // 2. Render immediately with seed + local
+      renderAll();
+
+      // 3. Fetch latest state from Cloud KV store
+      pullFromCloud();
+    }
+
+    function mergeIntoState(incoming) {
+      if (!incoming || typeof incoming !== 'object') return;
+      if (incoming.checked) {
+        for (const [k, v] of Object.entries(incoming.checked)) {
+          if (v === true) appState.checked[k] = true;
+          else if (!(k in appState.checked)) appState.checked[k] = !!v;
+        }
+      }
+      // Keep FLVS gradebook verified completions locked as true
+      for (const c of CONFIG.courses) {
+        for (const t of [...c.weekly_tasks, ...c.next_up]) {
+          if (t.flvs_done) appState.checked[t.id] = true;
+        }
+      }
+      if (incoming.courseNotes) {
+        for (const [k, v] of Object.entries(incoming.courseNotes)) {
+          if (v && String(v).trim().length > 0) {
+            appState.courseNotes[k] = v;
+          }
+        }
+      }
+      if (incoming.dbaDates) {
+        for (const [k, v] of Object.entries(incoming.dbaDates)) {
+          if (v && String(v).trim().length > 0) {
+            appState.dbaDates[k] = v;
+          }
+        }
+      }
+      if (incoming.generalNotes && String(incoming.generalNotes).trim().length > 0) {
+        appState.generalNotes = incoming.generalNotes;
+      }
+      if (Array.isArray(incoming.noteLog) && incoming.noteLog.length > 0) {
+        const existingKeys = new Set((appState.noteLog || []).map(x => x.time + "|" + x.text));
+        for (const item of incoming.noteLog) {
+          const key = item.time + "|" + item.text;
+          if (!existingKeys.has(key)) {
+            appState.noteLog.push(item);
+            existingKeys.add(key);
+          }
+        }
+      }
+    }
+
+    async function pullFromCloud() {
+      setSyncStatus("syncing", "☁️ Checking cloud...");
+      try {
+        const res = await fetch(KV_URL, { method: "GET", headers: { "Accept": "application/json" } });
+        if (res.ok) {
+          const cloudData = await res.json();
+          mergeIntoState(cloudData);
+          saveToLocal();
+          renderAll();
+          setSyncStatus("ok", "☁️ Cloud Synced");
+        } else if (res.status === 404) {
+          await pushToCloud();
+        } else {
+          setSyncStatus("local", "💾 Saved Locally");
+        }
+      } catch (e) {
+        console.warn("Cloud pull fallback:", e);
+        setSyncStatus("local", "💾 Saved Locally");
+      }
+    }
+
+    function saveToLocal() {
+      appState.updatedAt = new Date().toISOString();
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (e) {}
+    }
+
+    function scheduleCloudSave() {
+      saveToLocal();
+      setSyncStatus("syncing", "☁️ Saving...");
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {
+        pushToCloud();
+      }, 450);
+    }
+
+    async function pushToCloud() {
+      saveToLocal();
+      try {
+        const res = await fetch(KV_URL, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(appState)
+        });
+        if (res.ok) {
+          const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          setSyncStatus("ok", "☁️ Saved · " + nowTime);
+          const ind = document.getElementById("notes-save-indicator");
+          if (ind) ind.textContent = "☁️ Saved to cloud at " + nowTime;
+        } else {
+          setSyncStatus("local", "💾 Saved on Device");
+        }
+      } catch (e) {
+        setSyncStatus("local", "💾 Saved on Device");
+      }
+    }
+
+    async function manualCloudSync() {
+      await pushToCloud();
+      showToast("Synced your checklist & notes to the cloud!");
+    }
+
+    function setSyncStatus(mode, text) {
+      const dot = document.getElementById("sync-dot");
+      const label = document.getElementById("sync-text");
+      if (!dot || !label) return;
+      label.textContent = text;
+      dot.className = "w-2 h-2 rounded-full ";
+      if (mode === "ok") dot.className += "bg-emerald-400";
+      else if (mode === "syncing") dot.className += "bg-sky-400 animate-pulse";
+      else dot.className += "bg-amber-400";
+    }
+
+    function toggleTask(taskId) {
+      appState.checked[taskId] = !appState.checked[taskId];
+      renderProgress();
+      renderCourses();
+      scheduleCloudSave();
+    }
+
+    function onCourseNoteInput(courseId, val) {
+      appState.courseNotes[courseId] = val;
+      scheduleCloudSave();
+    }
+
+    function onCourseDbaInput(courseId, val) {
+      appState.dbaDates[courseId] = val;
+      scheduleCloudSave();
+    }
+
+    function onGeneralNotesInput(val) {
+      appState.generalNotes = val;
+      scheduleCloudSave();
+    }
+
+    function addLogEntry() {
+      const sel = document.getElementById("log-course-select");
+      const inp = document.getElementById("log-text-input");
+      const text = (inp.value || "").trim();
+      if (!text) return;
+      const now = new Date();
+      const stamp = (now.getMonth() + 1) + "/" + now.getDate() + " " +
+        now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      appState.noteLog = appState.noteLog || [];
+      appState.noteLog.unshift({
+        time: stamp,
+        course: sel ? sel.value : "General",
+        text: text
+      });
+      inp.value = "";
+      renderNoteLog();
+      scheduleCloudSave();
+      showToast("Added note to your weekly log!");
+    }
+
+    function toggleQueue(courseId) {
+      expandedQueues[courseId] = !expandedQueues[courseId];
+      renderCourses();
+    }
+
+    function setFilter(f) {
+      currentFilter = f;
+      ['all', 'todo', 'done'].forEach(k => {
+        const btn = document.getElementById('filter-' + k);
+        if (!btn) return;
+        if (k === f) {
+          btn.className = "text-xs px-2.5 py-1 rounded-md font-medium bg-slate-800 text-white border border-slate-600 transition-all";
+        } else {
+          btn.className = "text-xs px-2.5 py-1 rounded-md font-medium text-slate-400 hover:text-white border border-transparent transition-all";
+        }
+      });
+      renderCourses();
+    }
+
+    function renderProgress() {
+      let total = 0;
+      let done = 0;
+      for (const c of CONFIG.courses) {
+        for (const t of c.weekly_tasks) {
+          total++;
+          if (appState.checked[t.id]) done++;
+        }
+      }
+      const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+      document.getElementById("progress-fraction").textContent = done + " / " + total;
+      document.getElementById("progress-percent").textContent = pct + "% Complete";
+      document.getElementById("progress-bar-fill").style.width = pct + "%";
+    }
+
+    function badgeToneClasses(tone) {
+      if (tone === "danger") return "bg-rose-500/15 text-rose-300 border-rose-500/30";
+      if (tone === "warning") return "bg-amber-500/15 text-amber-300 border-amber-500/30";
+      if (tone === "info") return "bg-sky-500/15 text-sky-300 border-sky-500/30";
+      return "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
+    }
+
+    function renderTaskItem(t, isWeeklyTarget) {
+      const isChecked = !!appState.checked[t.id];
+      if (currentFilter === 'todo' && isChecked) return '';
+      if (currentFilter === 'done' && !isChecked) return '';
+
+      const flvsDone = t.flvs_done;
+      const borderCls = isChecked
+        ? "border-emerald-500/40 bg-emerald-950/20"
+        : (t.priority ? "border-amber-500/40 bg-slate-900/70" : "border-slate-700/70 bg-slate-900/40");
+
+      return `
+        <div onclick="toggleTask('${t.id}')"
+          class="task-row cursor-pointer rounded-lg border p-3 flex items-start gap-3 select-none ${borderCls} hover:border-slate-500">
+          <button type="button" aria-label="Toggle task"
+            class="mt-0.5 w-5 h-5 rounded flex items-center justify-center border transition-all shrink-0 ${
+              isChecked
+                ? 'bg-emerald-500 border-emerald-400 text-slate-950'
+                : 'border-slate-500 bg-slate-950/60 hover:border-sky-400'
+            }">
+            ${isChecked ? '<svg class="w-3.5 h-3.5 stroke-[3]" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
+          </button>
+          <div class="flex-1 min-w-0">
+            <div class="flex flex-wrap items-center gap-1.5">
+              <span class="text-sm font-semibold ${isChecked ? 'line-through text-slate-400' : 'text-slate-100'}">
+                ${escapeHtml(t.title)}
+              </span>
+              <span class="text-[11px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                ${escapeHtml(t.type)}
+              </span>
+              ${t.badge ? `<span class="text-[11px] font-mono px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30">${escapeHtml(t.badge)}</span>` : ''}
+              ${flvsDone ? `<span class="text-[11px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">✅ In FLVS (${escapeHtml(flvsDone.score)})</span>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCourses() {
+      const grid = document.getElementById("courses-grid");
+      let html = "";
+
+      for (const c of CONFIG.courses) {
+        const cTotal = c.weekly_tasks.length;
+        const cDone = c.weekly_tasks.filter(t => !!appState.checked[t.id]).length;
+        const weeklyTasksHtml = c.weekly_tasks.map(t => renderTaskItem(t, true)).join("");
+        const isExpanded = !!expandedQueues[c.id];
+        const nextUpHtml = c.next_up.map(t => renderTaskItem(t, false)).join("");
+
+        const pwHtml = (c.passwords && c.passwords.length > 0)
+          ? `<div class="flex flex-wrap items-center gap-2 pt-1">
+              ${c.passwords.map(p => `
+                <div class="flex items-center gap-1.5 text-xs font-mono bg-amber-500/10 border border-amber-500/30 text-amber-200 px-2.5 py-1 rounded-md">
+                  <span>🔑 ${escapeHtml(p.label)}: <strong class="text-white">${escapeHtml(p.value)}</strong></span>
+                  <button type="button" onclick="event.stopPropagation(); copyText('${escapeAttr(p.value)}', 'Copied ${escapeAttr(p.value)}!')"
+                    class="ml-1 px-1.5 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-100 text-[11px]">
+                    Copy
+                  </button>
+                </div>
+              `).join("")}
+            </div>`
+          : "";
+
+        const dbaBtnHtml = c.dba_url
+          ? `<a href="${c.dba_url}" target="_blank" rel="noopener"
+              class="text-xs font-semibold px-3 py-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40 flex items-center gap-1.5 transition-all active:scale-95">
+              <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i>
+              <span>${escapeHtml(c.dba_label)}</span>
+            </a>`
+          : `<span class="text-xs font-mono px-2.5 py-1.5 rounded-lg surface-sub border text-slate-300 flex items-center gap-1.5">
+              <i data-lucide="phone" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span>${escapeHtml(c.dba_label)}</span>
+            </span>`;
+
+        const savedCourseNote = appState.courseNotes[c.id] || "";
+        const savedDbaDate = appState.dbaDates[c.id] || "";
+
+        html += `
+          <article class="surface-card border rounded-xl p-5 flex flex-col justify-between space-y-4">
+            <div class="space-y-3">
+              <!-- Card Header: Course Name + Status Badge + Grade/Pace -->
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <span class="inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded border ${badgeToneClasses(c.status_tone)} mb-1.5">
+                    ${escapeHtml(c.status_badge)}
+                  </span>
+                  <h3 class="font-display text-lg font-bold flex items-center gap-2">
+                    <i data-lucide="${c.icon}" class="w-5 h-5 text-sky-400 shrink-0"></i>
+                    <span>${escapeHtml(c.name)}</span>
+                    <span class="text-xs font-mono font-normal text-slate-400">(${escapeHtml(c.segment)})</span>
+                  </h3>
+                </div>
+                <div class="text-right shrink-0">
+                  <div class="font-mono text-base font-bold text-white">${escapeHtml(c.grade)}</div>
+                  <div class="font-mono text-xs text-slate-400">${escapeHtml(c.percent)} · ${escapeHtml(c.done_str)}</div>
+                </div>
+              </div>
+
+              <!-- Direct FLVS Launch Buttons -->
+              <div class="flex flex-wrap items-center gap-2">
+                <a href="${c.course_url}" target="_blank" rel="noopener"
+                  class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 transition-all active:scale-95">
+                  <i data-lucide="play-circle" class="w-3.5 h-3.5"></i>
+                  <span>Open Course Home</span>
+                </a>
+                <a href="${c.grades_url}" target="_blank" rel="noopener"
+                  class="text-xs font-semibold px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-600 flex items-center gap-1.5 transition-all active:scale-95">
+                  <i data-lucide="bar-chart-3" class="w-3.5 h-3.5 text-sky-400"></i>
+                  <span>Gradebook</span>
+                </a>
+                ${dbaBtnHtml}
+              </div>
+
+              <!-- Teacher Info & Unlocked Passwords Box -->
+              <div class="surface-sub border rounded-lg p-3 space-y-2 text-xs">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div class="font-semibold text-slate-200 flex items-center gap-1.5">
+                    <i data-lucide="user-check" class="w-4 h-4 text-sky-400"></i>
+                    <span>${escapeHtml(c.teacher_name)}</span>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-2 font-mono text-[11px]">
+                    <a href="tel:${c.teacher_phone.replace(/[^0-9]/g, '').slice(0,10)}"
+                      class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700">
+                      📞 ${escapeHtml(c.teacher_phone)}
+                    </a>
+                    <a href="mailto:${c.teacher_email}"
+                      class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700">
+                      ✉️ ${escapeHtml(c.teacher_email)}
+                    </a>
+                  </div>
+                </div>
+                ${pwHtml}
+                <p class="text-slate-300 leading-relaxed pt-1 border-t border-slate-700/60">
+                  💡 <strong>Teacher Tip:</strong> ${escapeHtml(c.teacher_note)}
+                </p>
+              </div>
+
+              <!-- Weekly Target Checklist -->
+              <div class="space-y-2 pt-1">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold uppercase tracking-wider text-slate-300">
+                    🎯 This Week's Target Checklist (Due by EOW)
+                  </span>
+                  <span class="font-mono text-emerald-400 font-semibold">${cDone} / ${cTotal} Done</span>
+                </div>
+                <div class="space-y-2">
+                  ${weeklyTasksHtml || '<p class="text-xs text-slate-500 italic py-1">No matching tasks for this filter.</p>'}
+                </div>
+              </div>
+
+              <!-- Expandable Work-Ahead Queue -->
+              ${c.next_up && c.next_up.length > 0 ? `
+                <div class="pt-1">
+                  <button type="button" onclick="toggleQueue('${c.id}')"
+                    class="text-xs font-mono text-sky-400 hover:text-sky-300 flex items-center gap-1">
+                    <span>${isExpanded ? '▾ Hide' : '▸ Show'} Next Up / Work-Ahead Queue (${c.next_up.length} items)</span>
+                  </button>
+                  ${isExpanded ? `<div class="mt-2 space-y-2 pl-2 border-l-2 border-slate-700">${nextUpHtml}</div>` : ''}
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- Per-Course DBA Time & Student Notes (Auto-Saved) -->
+            <div class="pt-3 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-12 gap-2">
+              <div class="sm:col-span-5">
+                <label class="block text-[11px] font-mono text-slate-400 mb-1">📅 DBA / Call Date &amp; Time:</label>
+                <input type="text" value="${escapeAttr(savedDbaDate)}"
+                  placeholder="e.g. Thu 11/6 @ 2:00 PM"
+                  oninput="onCourseDbaInput('${c.id}', this.value)"
+                  class="w-full rounded-md surface-sub border px-2.5 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500" />
+              </div>
+              <div class="sm:col-span-7">
+                <label class="block text-[11px] font-mono text-slate-400 mb-1">📝 My Notes / Questions for ${escapeHtml(c.name)}:</label>
+                <input type="text" value="${escapeAttr(savedCourseNote)}"
+                  placeholder="Type a note or question for this class..."
+                  oninput="onCourseNoteInput('${c.id}', this.value)"
+                  class="w-full rounded-md surface-sub border px-2.5 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500" />
+              </div>
+            </div>
+          </article>
+        `;
+      }
+
+      grid.innerHTML = html;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderNoteLog() {
+      const box = document.getElementById("log-entries-container");
+      const genInput = document.getElementById("general-notes-input");
+      if (genInput && document.activeElement !== genInput) {
+        genInput.value = appState.generalNotes || "";
+      }
+      if (!box) return;
+      const list = appState.noteLog || [];
+      if (list.length === 0) {
+        box.innerHTML = `<div class="text-slate-500 italic py-2 text-center">No timestamped check-in notes yet this week.</div>`;
+        return;
+      }
+      box.innerHTML = list.map((item, idx) => `
+        <div class="flex items-start justify-between gap-2 py-1 border-b border-slate-800/60 last:border-0">
+          <div>
+            <span class="text-sky-400">[${escapeHtml(item.time)}]</span>
+            <span class="text-amber-300 font-semibold"> ${escapeHtml(item.course || 'General')}:</span>
+            <span class="text-slate-200"> ${escapeHtml(item.text)}</span>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderAll() {
+      renderProgress();
+      renderCourses();
+      renderNoteLog();
+    }
+
+    function buildMarkdownSummary() {
+      let lines = [
+        `# ${CONFIG.name}'s Weekly FLVS Check-In (${CONFIG.week_range})`,
+        `Updated: ${new Date().toLocaleString()}`,
+        ""
+      ];
+      for (const c of CONFIG.courses) {
+        lines.push(`## ${c.name} (${c.grade} · ${c.percent})`);
+        const dba = (appState.dbaDates[c.id] || "").trim();
+        const note = (appState.courseNotes[c.id] || "").trim();
+        if (dba) lines.push(`- 📅 DBA/Call Scheduled: ${dba}`);
+        if (note) lines.push(`- 📝 Course Note: ${note}`);
+        for (const t of c.weekly_tasks) {
+          const mark = appState.checked[t.id] ? "x" : " ";
+          lines.push(`- [${mark}] ${t.title}`);
+        }
+        lines.push("");
+      }
+      if ((appState.generalNotes || "").trim()) {
+        lines.push(`## General Notes / Questions`);
+        lines.push(appState.generalNotes.trim());
+        lines.push("");
+      }
+      if ((appState.noteLog || []).length > 0) {
+        lines.push(`## Activity Log`);
+        for (const entry of appState.noteLog) {
+          lines.push(`- [${entry.time}] (${entry.course}): ${entry.text}`);
+        }
+      }
+      return lines.join("\n");
+    }
+
+    function copyWeeklySummary() {
+      const md = buildMarkdownSummary();
+      navigator.clipboard.writeText(md).then(() => {
+        showToast("Copied your weekly Markdown summary to clipboard!");
+      });
+    }
+
+    function copyText(txt, msg) {
+      navigator.clipboard.writeText(txt).then(() => {
+        showToast(msg || "Copied!");
+      });
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      const m = document.getElementById("toast-msg");
+      if (!t || !m) return;
+      m.textContent = msg;
+      t.classList.remove("hidden");
+      setTimeout(() => t.classList.add("hidden"), 2600);
+    }
+
+    function toggleTheme() {
+      document.documentElement.classList.toggle("dark");
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function escapeAttr(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    window.addEventListener("DOMContentLoaded", loadInitialState);
+  </script>
+</body>
+</html>
