@@ -99,8 +99,12 @@
           </p>
         </div>
 
-        <div class="flex items-center gap-3 text-xs font-mono-num">
+        <div class="flex items-center gap-2.5 text-xs font-mono-num flex-wrap">
           <span id="sync-status" class="text-muted">Saved</span>
+          <button type="button" onclick="toggleParentSignIn()" id="parent-auth-btn"
+            class="px-2.5 py-1.5 rounded card-surface hover:opacity-80 transition">
+            Parent Sign-In
+          </button>
           <button type="button" onclick="copyWeeklySummary()"
             class="px-2.5 py-1.5 rounded card-surface hover:opacity-80 transition">
             Copy Summary
@@ -410,14 +414,14 @@
           "max_points": 0.0,
           "is_retake": false,
           "prior_earned": 0.0
-        }
-      ],
-      "next_up": [
+        },
         {
           "id": "ess_01_01",
           "code": "01.01",
           "title": "01.01 Welcome to Earth Space Science",
           "type": "Quiz",
+          "badge": "",
+          "priority": false,
           "flvs_done": null,
           "max_points": 6.0,
           "is_retake": false,
@@ -428,11 +432,15 @@
           "code": "01.02",
           "title": "01.02 Scientific Investigation",
           "type": "Quiz",
+          "badge": "",
+          "priority": false,
           "flvs_done": null,
           "max_points": 20.0,
           "is_retake": false,
           "prior_earned": 0.0
-        },
+        }
+      ],
+      "next_up": [
         {
           "id": "ess_01_03",
           "code": "01.03",
@@ -440,6 +448,26 @@
           "type": "Quiz",
           "flvs_done": null,
           "max_points": 24.0,
+          "is_retake": false,
+          "prior_earned": 0.0
+        },
+        {
+          "id": "ess_01_04",
+          "code": "01.04",
+          "title": "01.04 Measurement",
+          "type": "Quiz",
+          "flvs_done": null,
+          "max_points": 22.0,
+          "is_retake": false,
+          "prior_earned": 0.0
+        },
+        {
+          "id": "ess_01_05",
+          "code": "01.05",
+          "title": "01.05 Atomic Structure and Forces",
+          "type": "Written Assignment",
+          "flvs_done": null,
+          "max_points": 50.0,
           "is_retake": false,
           "prior_earned": 0.0
         }
@@ -480,14 +508,14 @@
           "max_points": 0.0,
           "is_retake": false,
           "prior_earned": 0.0
-        }
-      ],
-      "next_up": [
+        },
         {
           "id": "eng2_01_01",
           "code": "01.01",
           "title": "01.01 All About Words",
           "type": "Quiz",
+          "badge": "",
+          "priority": false,
           "flvs_done": null,
           "max_points": 23.0,
           "is_retake": false,
@@ -498,11 +526,15 @@
           "code": "01.02",
           "title": "01.02 Expressive Poetry",
           "type": "Written Assignment",
+          "badge": "",
+          "priority": false,
           "flvs_done": null,
           "max_points": 50.0,
           "is_retake": false,
           "prior_earned": 0.0
-        },
+        }
+      ],
+      "next_up": [
         {
           "id": "eng2_01_03",
           "code": "01.03",
@@ -510,6 +542,26 @@
           "type": "Quiz",
           "flvs_done": null,
           "max_points": 31.0,
+          "is_retake": false,
+          "prior_earned": 0.0
+        },
+        {
+          "id": "eng2_01_04",
+          "code": "01.04",
+          "title": "01.04 Figuring Out Fiction",
+          "type": "Quiz",
+          "flvs_done": null,
+          "max_points": 30.0,
+          "is_retake": false,
+          "prior_earned": 0.0
+        },
+        {
+          "id": "eng2_01_05",
+          "code": "01.05",
+          "title": "01.05 Techniques in Storytelling",
+          "type": "Written Assignment",
+          "flvs_done": null,
+          "max_points": 50.0,
           "is_retake": false,
           "prior_earned": 0.0
         }
@@ -525,7 +577,7 @@
   "student": "lorelei",
   "studentName": "Lorelei Dickson",
   "weekId": "2026-11-02",
-  "updatedAt": "2026-11-04T23:19:48.685Z",
+  "updatedAt": "2026-11-04 20:07:42",
   "checked": {
     "geom_01_02": false,
     "geom_01_04": false,
@@ -544,7 +596,11 @@
     "eng2_reactivate": false,
     "eng2_01_01": false,
     "eng2_01_02": false,
-    "eng2_01_03": false
+    "eng2_01_03": false,
+    "ess_01_04": false,
+    "ess_01_05": false,
+    "eng2_01_04": false,
+    "eng2_01_05": false
   },
   "courseNotes": {
     "6386": "",
@@ -559,38 +615,235 @@
     "7152": ""
   },
   "generalNotes": "",
-  "noteLog": []
+  "noteLog": [],
+  "parentAddedIds": [],
+  "parentRemovedIds": [],
+  "customMandatory": {
+    "7152": [],
+    "6648": [],
+    "6483": [],
+    "6386": []
+  },
+  "studentWorkAheadIds": [],
+  "unverifiedFlags": {}
 };
     const KV_URL = "https://kvdb.io/X8X3JYafoUfm6j9qA93Vzp/lorelei_2026-11-02";
     const STORAGE_KEY = "flvs_weekly_state_" + CONFIG.kv_key;
 
+    const PARENT_EMAIL = "sarahrdickson@gmail.com";
     let appState = JSON.parse(JSON.stringify(SEED_STATE));
     let currentFilter = 'all';
     let saveTimer = null;
     let expandedQueues = {};
     let expandedNotes = {};
     let expandedTips = {};
-    let initializedCourses = {};
     let activeCalTaskId = null;
+    let isParent = false;
 
-    function markCourseInitialized(courseId) {
-      initializedCourses[courseId] = true;
+    function checkParentAuth() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const qEmail = (params.get("email") || params.get("user") || "").trim().toLowerCase();
+        if (qEmail === PARENT_EMAIL || params.get("parent") === "1") {
+          localStorage.setItem("flvs_parent_email", PARENT_EMAIL);
+        }
+        const savedEmail = (localStorage.getItem("flvs_parent_email") || "").trim().toLowerCase();
+        isParent = (savedEmail === PARENT_EMAIL);
+      } catch (e) {
+        isParent = false;
+      }
+      updateParentAuthButton();
     }
 
-    function openGradebook(courseId, courseUrl, gradesUrl) {
-      const targetName = "flvs_course_" + courseId;
-      if (initializedCourses[courseId]) {
-        window.open(gradesUrl, targetName);
+    function updateParentAuthButton() {
+      const btn = document.getElementById("parent-auth-btn");
+      if (!btn) return;
+      if (isParent) {
+        btn.textContent = "Parent Mode: sarahrdickson@gmail.com (Sign Out)";
+        btn.style.borderColor = "var(--accent)";
+        btn.style.color = "var(--accent)";
+      } else {
+        btn.textContent = "Parent Sign-In";
+        btn.style.borderColor = "var(--border-subtle)";
+        btn.style.color = "var(--text-primary)";
+      }
+    }
+
+    function toggleParentSignIn() {
+      if (isParent) {
+        if (confirm("Sign out of Parent Edit Mode on this browser?")) {
+          try { localStorage.removeItem("flvs_parent_email"); } catch (e) {}
+          isParent = false;
+          updateParentAuthButton();
+          renderCourses();
+          showToast("Signed out of Parent Mode");
+        }
         return;
       }
-      // FLVS Educator requires hitting announcements.cgi with the slt token first
-      // to set the active course session cookie before /educatorng/.../grade-report will load.
-      showToast("Connecting to FLVS class session first, then opening Gradebook...");
-      window.open(courseUrl, targetName);
-      initializedCourses[courseId] = true;
-      setTimeout(() => {
-        window.open(gradesUrl, targetName);
-      }, 1600);
+      const entered = (prompt("Sign in with your parent email address to unlock Mandatory Course Controls:") || "").trim().toLowerCase();
+      if (!entered) return;
+      if (entered === PARENT_EMAIL) {
+        try { localStorage.setItem("flvs_parent_email", PARENT_EMAIL); } catch (e) {}
+        isParent = true;
+        updateParentAuthButton();
+        renderCourses();
+        showToast("Signed in as " + PARENT_EMAIL + " — Parent Controls unlocked!");
+      } else {
+        alert("Only " + PARENT_EMAIL + " is authorized to modify Mandatory assignments.");
+      }
+    }
+
+    function getCourseTaskLists(c) {
+      const pAdded = new Set(appState.parentAddedIds || []);
+      const pRemoved = new Set(appState.parentRemovedIds || []);
+      const sWorkAhead = new Set(appState.studentWorkAheadIds || []);
+      const customList = (appState.customMandatory && appState.customMandatory[c.id]) || [];
+
+      const mandatoryTasks = [];
+      for (const t of c.weekly_tasks) {
+        if (!pRemoved.has(t.id)) {
+          mandatoryTasks.push({ ...t, isMandatory: true });
+        }
+      }
+      for (const t of c.next_up) {
+        if (pAdded.has(t.id) && !pRemoved.has(t.id)) {
+          mandatoryTasks.push({ ...t, isMandatory: true });
+        }
+      }
+      for (const ct of customList) {
+        if (!pRemoved.has(ct.id)) {
+          mandatoryTasks.push({ ...ct, isMandatory: true, isCustom: true });
+        }
+      }
+
+      const mandatoryIds = new Set(mandatoryTasks.map(t => t.id));
+      const studentWorkAheadTasks = [];
+      for (const t of [...c.next_up, ...c.weekly_tasks]) {
+        if (!mandatoryIds.has(t.id) && sWorkAhead.has(t.id)) {
+          studentWorkAheadTasks.push({ ...t, isMandatory: false, isWorkAhead: true });
+        }
+      }
+
+      const activeIds = new Set([...mandatoryIds, ...studentWorkAheadTasks.map(t => t.id)]);
+      const availablePool = [];
+      for (const t of [...c.next_up, ...c.weekly_tasks]) {
+        if (!activeIds.has(t.id)) {
+          availablePool.push(t);
+        }
+      }
+
+      return {
+        mandatoryTasks,
+        studentWorkAheadTasks,
+        activeTasks: [...mandatoryTasks, ...studentWorkAheadTasks],
+        availablePool
+      };
+    }
+
+    function parentRemoveMandatory(evt, taskId) {
+      evt.stopPropagation();
+      if (!isParent) return;
+      appState.parentRemovedIds = appState.parentRemovedIds || [];
+      if (!appState.parentRemovedIds.includes(taskId)) {
+        appState.parentRemovedIds.push(taskId);
+      }
+      appState.parentAddedIds = (appState.parentAddedIds || []).filter(id => id !== taskId);
+      renderProgress();
+      renderCourses();
+      scheduleCloudSave();
+      showToast("Removed from Mandatory list");
+    }
+
+    function parentMakeMandatory(evt, taskId) {
+      evt.stopPropagation();
+      if (!isParent) return;
+      appState.parentAddedIds = appState.parentAddedIds || [];
+      if (!appState.parentAddedIds.includes(taskId)) {
+        appState.parentAddedIds.push(taskId);
+      }
+      appState.parentRemovedIds = (appState.parentRemovedIds || []).filter(id => id !== taskId);
+      appState.studentWorkAheadIds = (appState.studentWorkAheadIds || []).filter(id => id !== taskId);
+      renderProgress();
+      renderCourses();
+      scheduleCloudSave();
+      showToast("Added as Mandatory assignment");
+    }
+
+    function parentAddCustomMandatory(courseId) {
+      if (!isParent) return;
+      const title = (prompt("Enter Mandatory assignment title (e.g., 02.04 Graphing Quadratics):") || "").trim();
+      if (!title) return;
+      const type = (prompt("Assignment type (e.g., Quiz, Written Assignment, DBA):", "Assignment") || "Assignment").trim();
+      const mCode = title.match(/\b(\d{2}\.\d{2})\b/);
+      const code = mCode ? mCode[1] : "CUSTOM";
+      const newId = "custom_" + courseId + "_" + Date.now();
+      appState.customMandatory = appState.customMandatory || {};
+      appState.customMandatory[courseId] = appState.customMandatory[courseId] || [];
+      appState.customMandatory[courseId].push({
+        id: newId,
+        code: code,
+        title: title,
+        type: type,
+        badge: "Added by Mom",
+        priority: true,
+        flvs_done: null
+      });
+      renderProgress();
+      renderCourses();
+      scheduleCloudSave();
+      showToast("Added custom Mandatory assignment");
+    }
+
+    function parentClearCourseVacation(courseId) {
+      if (!isParent) return;
+      const c = CONFIG.courses.find(x => x.id === courseId);
+      if (!c) return;
+      appState.parentRemovedIds = appState.parentRemovedIds || [];
+      const lists = getCourseTaskLists(c);
+      for (const t of lists.mandatoryTasks) {
+        if (!appState.parentRemovedIds.includes(t.id)) {
+          appState.parentRemovedIds.push(t.id);
+        }
+      }
+      renderProgress();
+      renderCourses();
+      scheduleCloudSave();
+      showToast("Cleared Mandatory items for " + c.name + " (Vacation / Light Week)");
+    }
+
+    function parentRestoreCourseDefaults(courseId) {
+      if (!isParent) return;
+      const c = CONFIG.courses.find(x => x.id === courseId);
+      if (!c) return;
+      const courseIds = new Set([...c.weekly_tasks.map(t => t.id), ...c.next_up.map(t => t.id)]);
+      appState.parentRemovedIds = (appState.parentRemovedIds || []).filter(id => !courseIds.has(id));
+      appState.parentAddedIds = (appState.parentAddedIds || []).filter(id => !courseIds.has(id));
+      if (appState.customMandatory) appState.customMandatory[courseId] = [];
+      renderProgress();
+      renderCourses();
+      scheduleCloudSave();
+      showToast("Restored default Mandatory list (2 new + <70% retakes) for " + c.name);
+    }
+
+    function studentAddWorkAhead(evt, taskId) {
+      evt.stopPropagation();
+      appState.studentWorkAheadIds = appState.studentWorkAheadIds || [];
+      if (!appState.studentWorkAheadIds.includes(taskId)) {
+        appState.studentWorkAheadIds.push(taskId);
+      }
+      renderProgress();
+      renderCourses();
+      scheduleCloudSave();
+      showToast("Added to your Work Ahead list for this week!");
+    }
+
+    function studentRemoveWorkAhead(evt, taskId) {
+      evt.stopPropagation();
+      appState.studentWorkAheadIds = (appState.studentWorkAheadIds || []).filter(id => id !== taskId);
+      renderProgress();
+      renderCourses();
+      scheduleCloudSave();
+      showToast("Removed from your Work Ahead list");
     }
 
     function toggleCalPicker(evt, taskId) {
@@ -705,6 +958,7 @@
     }
 
     function loadInitialState() {
+      checkParentAuth();
       try {
         const savedTheme = localStorage.getItem("flvs_theme_" + CONFIG.key);
         if (savedTheme === "dark") document.documentElement.classList.add("dark");
@@ -719,8 +973,7 @@
       if (!incoming || typeof incoming !== 'object') return;
       if (incoming.checked) {
         for (const [k, v] of Object.entries(incoming.checked)) {
-          if (v === true) appState.checked[k] = true;
-          else if (!(k in appState.checked)) appState.checked[k] = !!v;
+          appState.checked[k] = !!v;
         }
       }
       for (const c of CONFIG.courses) {
@@ -738,11 +991,14 @@
           if (v && String(v).trim().length > 0) appState.dbaDates[k] = v;
         }
       }
-      if (incoming.taskScores) {
-        appState.taskScores = appState.taskScores || {};
-        for (const [k, v] of Object.entries(incoming.taskScores)) {
-          if (v !== undefined && v !== null) appState.taskScores[k] = Number(v);
-        }
+      if (Array.isArray(incoming.parentAddedIds)) appState.parentAddedIds = incoming.parentAddedIds;
+      if (Array.isArray(incoming.parentRemovedIds)) appState.parentRemovedIds = incoming.parentRemovedIds;
+      if (incoming.customMandatory && typeof incoming.customMandatory === 'object') {
+        appState.customMandatory = incoming.customMandatory;
+      }
+      if (Array.isArray(incoming.studentWorkAheadIds)) appState.studentWorkAheadIds = incoming.studentWorkAheadIds;
+      if (incoming.unverifiedFlags && typeof incoming.unverifiedFlags === 'object') {
+        appState.unverifiedFlags = incoming.unverifiedFlags;
       }
       if (incoming.generalNotes && String(incoming.generalNotes).trim().length > 0) {
         appState.generalNotes = incoming.generalNotes;
@@ -819,62 +1075,21 @@
 
     function toggleTask(taskId) {
       appState.checked[taskId] = !appState.checked[taskId];
+      if (appState.checked[taskId] && appState.unverifiedFlags) {
+        delete appState.unverifiedFlags[taskId];
+      }
       renderProgress();
       renderCourses();
       scheduleCloudSave();
     }
 
-    function onTaskScoreInput(evt, taskId, val) {
-      evt.stopPropagation();
-      appState.taskScores = appState.taskScores || {};
-      const num = Math.max(0, Math.min(100, Number(val) || 0));
-      appState.taskScores[taskId] = num;
-      renderCourses();
-      scheduleCloudSave();
-    }
-
     function computeLiveCourseMetrics(c) {
-      let earned = Number(c.base_earned) || 0;
-      let poss = Number(c.base_poss) || 0;
-      let done = Number(c.base_done) || 0;
-      const total = Number(c.total_count) || 0;
-      let addedCount = 0;
-
-      for (const t of [...c.weekly_tasks, ...c.next_up]) {
-        if (appState.checked[t.id] && !t.flvs_done) {
-          addedCount++;
-          const maxPts = Number(t.max_points) || 0;
-          const scorePct = (appState.taskScores && appState.taskScores[t.id] !== undefined)
-            ? Number(appState.taskScores[t.id])
-            : 100;
-          if (t.is_retake && maxPts > 0) {
-            const delta = Math.max(0, (maxPts * (scorePct / 100)) - (Number(t.prior_earned) || 0));
-            earned += delta;
-          } else if (maxPts > 0) {
-            earned += maxPts * (scorePct / 100);
-            poss += maxPts;
-            done += 1;
-          } else if (t.code !== "WELCOME" && t.code !== "STATUS") {
-            done += 1;
-          }
-        }
-      }
-
-      let gradeStr = c.grade;
-      if (poss > 0 && addedCount > 0) {
-        const pctVal = (earned / poss) * 100;
-        const letter = pctVal >= 90 ? "A" : (pctVal >= 80 ? "B" : (pctVal >= 70 ? "C" : (pctVal >= 60 ? "D" : "F")));
-        gradeStr = pctVal.toFixed(1) + "% (" + letter + ")";
-      }
-
-      const paceStr = total > 0 ? ((done / total) * 100).toFixed(1) + "%" : c.percent;
-      const doneStr = total > 0 ? (done + "/" + total + " items") : c.done_str;
-
+      // Official grade & pace come strictly from verified FLVS gradebook data
       return {
-        gradeStr,
-        paceStr,
-        doneStr,
-        isProjected: addedCount > 0
+        gradeStr: c.grade,
+        paceStr: c.percent,
+        doneStr: c.done_str,
+        isProjected: false
       };
     }
 
@@ -939,7 +1154,8 @@
     function renderProgress() {
       let total = 0, done = 0;
       for (const c of CONFIG.courses) {
-        for (const t of c.weekly_tasks) {
+        const lists = getCourseTaskLists(c);
+        for (const t of lists.activeTasks) {
           total++;
           if (appState.checked[t.id]) done++;
         }
@@ -949,18 +1165,57 @@
       document.getElementById("progress-bar-fill").style.width = pct + "%";
     }
 
-    function renderTaskRow(c, t) {
+    function renderTaskRow(c, t, mode) {
       const isChecked = !!appState.checked[t.id];
-      if (currentFilter === 'todo' && isChecked) return '';
-      if (currentFilter === 'done' && !isChecked) return '';
+      if (mode === "active") {
+        if (currentFilter === 'todo' && isChecked) return '';
+        if (currentFilter === 'done' && !isChecked) return '';
+      }
 
       const flvsDone = t.flvs_done;
       const showCal = activeCalTaskId === t.id;
       const quickDates = getQuickDates();
-      const maxPts = Number(t.max_points) || 0;
-      const savedScorePct = (appState.taskScores && appState.taskScores[t.id] !== undefined)
-        ? appState.taskScores[t.id]
-        : 100;
+      const unverifiedMsg = (appState.unverifiedFlags && appState.unverifiedFlags[t.id]) || "";
+
+      if (mode === "pool") {
+        return `
+          <div class="py-2.5 px-2 -mx-2 rounded-lg flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div class="min-w-0">
+              <span class="font-medium" style="color: var(--text-primary)">${escapeHtml(t.title)}</span>
+              <span class="font-mono-num text-muted ml-2">${escapeHtml(t.type)}</span>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <button type="button" onclick="studentAddWorkAhead(event, '${t.id}')"
+                class="px-2.5 py-1 rounded border font-medium hover:opacity-80 transition"
+                style="border-color: var(--border-subtle)">
+                + Add Work Ahead
+              </button>
+              ${isParent ? `
+                <button type="button" onclick="parentMakeMandatory(event, '${t.id}')"
+                  class="px-2.5 py-1 rounded accent-btn font-medium transition">
+                  + Make Mandatory
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      const roleTag = t.isMandatory
+        ? `<span class="text-[11px] font-mono-num px-1.5 py-0.5 rounded border text-muted" style="border-color: var(--border-subtle)">Mandatory</span>`
+        : `<span class="text-[11px] font-mono-num px-1.5 py-0.5 rounded" style="background-color: var(--accent-soft); color: var(--accent)">Work Ahead</span>`;
+
+      const removeBtn = (!t.isMandatory && t.isWorkAhead)
+        ? `<button type="button" onclick="studentRemoveWorkAhead(event, '${t.id}')"
+            class="text-xs text-muted hover:underline" title="Remove Work Ahead item">
+            Remove
+          </button>`
+        : (isParent && t.isMandatory
+          ? `<button type="button" onclick="parentRemoveMandatory(event, '${t.id}')"
+              class="text-xs text-rose-600 dark:text-rose-400 hover:underline font-medium" title="Parent: Remove Mandatory item">
+              Remove
+            </button>`
+          : '');
 
       return `
         <div class="py-3 px-2 -mx-2 rounded-lg task-item select-none">
@@ -974,18 +1229,22 @@
                 ${isChecked ? '<svg class="w-3.5 h-3.5 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
               </button>
               <div class="min-w-0">
-                <div class="text-sm font-medium leading-snug ${isChecked ? 'line-through text-muted' : ''}">
-                  ${escapeHtml(t.title)}
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="text-sm font-medium leading-snug ${isChecked ? 'line-through text-muted' : ''}">
+                    ${escapeHtml(t.title)}
+                  </span>
+                  ${roleTag}
                 </div>
                 ${t.badge ? `<div class="text-xs font-medium text-rose-600 dark:text-rose-400 mt-0.5">${escapeHtml(t.badge)}</div>` : ''}
-                ${flvsDone ? `<div class="text-xs font-mono-num text-emerald-700 dark:text-emerald-400 mt-0.5">Submitted in FLVS (${escapeHtml(flvsDone.score)})</div>` : ''}
-                ${isChecked && !flvsDone && maxPts > 0 ? `
-                  <div onclick="event.stopPropagation()" class="mt-1 inline-flex items-center gap-1.5 text-xs font-mono-num text-muted">
-                    <span>Score % (for grade calc):</span>
-                    <input type="number" min="0" max="100" value="${savedScorePct}"
-                      oninput="onTaskScoreInput(event, '${t.id}', this.value)"
-                      class="w-14 px-1.5 py-0.5 rounded text-xs font-mono-num" />
-                    <span>% of ${maxPts} pts</span>
+                ${flvsDone ? `<div class="text-xs font-mono-num text-emerald-700 dark:text-emerald-400 mt-0.5">Verified in FLVS (Score: ${escapeHtml(flvsDone.score)})</div>` : ''}
+                ${isChecked && !flvsDone && t.code !== 'WELCOME' && t.code !== 'STATUS' ? `
+                  <div class="text-xs font-mono-num text-amber-600 dark:text-amber-400 mt-0.5">
+                    Pending FLVS Gradebook verification &middot; Official grade updates once verified in FLVS
+                  </div>
+                ` : ''}
+                ${!isChecked && unverifiedMsg ? `
+                  <div class="text-xs font-medium text-rose-600 dark:text-rose-400 mt-0.5">
+                    ${escapeHtml(unverifiedMsg)}
                   </div>
                 ` : ''}
               </div>
@@ -1000,6 +1259,7 @@
                 <svg class="w-3.5 h-3.5 shrink-0" style="color: var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                 <span>Add to Calendar</span>
               </button>
+              ${removeBtn}
             </div>
           </div>
 
@@ -1034,10 +1294,11 @@
       let html = "";
 
       for (const c of CONFIG.courses) {
-        const cTotal = c.weekly_tasks.length;
-        const cDone = c.weekly_tasks.filter(t => !!appState.checked[t.id]).length;
-        const tasksHtml = c.weekly_tasks.map(t => renderTaskRow(c, t)).join("");
-        const nextUpHtml = c.next_up.map(t => renderTaskRow(c, t)).join("");
+        const lists = getCourseTaskLists(c);
+        const cTotal = lists.activeTasks.length;
+        const cDone = lists.activeTasks.filter(t => !!appState.checked[t.id]).length;
+        const tasksHtml = lists.activeTasks.map(t => renderTaskRow(c, t, "active")).join("");
+        const nextUpHtml = lists.availablePool.map(t => renderTaskRow(c, t, "pool")).join("");
 
         const savedNote = (appState.courseNotes[c.id] || "").trim();
         const savedDba = (appState.dbaDates[c.id] || "").trim();
@@ -1114,8 +1375,29 @@
 
             <!-- Checklist Items -->
             <div class="divide-y" style="border-color: var(--border-subtle)">
-              ${tasksHtml || '<p class="text-xs text-muted py-2">No tasks matching filter.</p>'}
+              ${tasksHtml || '<p class="text-xs text-muted py-2">No mandatory or work-ahead tasks assigned for this class this week.</p>'}
             </div>
+
+            ${isParent ? `
+              <!-- Parent Controls Bar (Only visible when signed in as sarahrdickson@gmail.com) -->
+              <div class="p-3 rounded-lg flex flex-wrap items-center justify-between gap-2 text-xs" style="background-color: var(--bg-canvas); border: 1px dashed var(--accent)">
+                <span class="font-semibold" style="color: var(--accent)">Parent Controls (sarahrdickson@gmail.com):</span>
+                <div class="flex flex-wrap items-center gap-2">
+                  <button type="button" onclick="parentAddCustomMandatory('${c.id}')"
+                    class="px-2.5 py-1 rounded accent-btn font-medium transition">
+                    + Add Mandatory Item
+                  </button>
+                  <button type="button" onclick="parentClearCourseVacation('${c.id}')"
+                    class="px-2.5 py-1 rounded card-surface font-medium hover:opacity-80 transition">
+                    Set Vacation / Clear Class
+                  </button>
+                  <button type="button" onclick="parentRestoreCourseDefaults('${c.id}')"
+                    class="px-2.5 py-1 rounded card-surface text-muted hover:opacity-80 transition">
+                    Reset Default (2 + Retakes)
+                  </button>
+                </div>
+              </div>
+            ` : ''}
 
             <!-- Collapsible Teacher Tip & Work-Ahead Queue & Course Note Controls -->
             <div class="hairline-top pt-3 space-y-3">
@@ -1123,9 +1405,9 @@
                 <button type="button" onclick="toggleTip('${c.id}')" class="hover:underline font-medium">
                   ${showTip ? 'Hide teacher note' : 'Teacher note'}
                 </button>
-                ${c.next_up && c.next_up.length > 0 ? `
+                ${lists.availablePool.length > 0 ? `
                   <button type="button" onclick="toggleQueue('${c.id}')" class="hover:underline font-medium">
-                    ${showQueue ? 'Hide next up (' + c.next_up.length + ')' : 'Work ahead (' + c.next_up.length + ' next up)'}
+                    ${showQueue ? 'Hide work ahead (' + lists.availablePool.length + ')' : 'Work ahead (+ add from ' + lists.availablePool.length + ' upcoming)'}
                   </button>
                 ` : ''}
                 <button type="button" onclick="toggleCourseNotes('${c.id}')" class="hover:underline font-medium">
@@ -1139,9 +1421,9 @@
                 </div>
               ` : ''}
 
-              ${showQueue ? `
+              ${showQueue && lists.availablePool.length > 0 ? `
                 <div class="pl-3 border-l-2 space-y-1" style="border-color: var(--border-subtle)">
-                  <div class="text-xs font-medium text-muted mb-1">Next Up in Course:</div>
+                  <div class="text-xs font-medium text-muted mb-1">Available to Add (Students can add as Work Ahead${isParent ? ' · Parent can Make Mandatory' : ''}):</div>
                   ${nextUpHtml}
                 </div>
               ` : ''}
