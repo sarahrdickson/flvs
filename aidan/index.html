@@ -519,6 +519,122 @@
     let expandedQueues = {};
     let expandedNotes = {};
     let expandedTips = {};
+    let initializedCourses = {};
+    let activeCalTaskId = null;
+
+    function markCourseInitialized(courseId) {
+      initializedCourses[courseId] = true;
+    }
+
+    function openGradebook(courseId, courseUrl, gradesUrl) {
+      const targetName = "flvs_course_" + courseId;
+      if (initializedCourses[courseId]) {
+        window.open(gradesUrl, targetName);
+        return;
+      }
+      // FLVS Educator requires hitting announcements.cgi with the slt token first
+      // to set the active course session cookie before /educatorng/.../grade-report will load.
+      showToast("Connecting to FLVS class session first, then opening Gradebook...");
+      window.open(courseUrl, targetName);
+      initializedCourses[courseId] = true;
+      setTimeout(() => {
+        window.open(gradesUrl, targetName);
+      }, 1600);
+    }
+
+    function toggleCalPicker(evt, taskId) {
+      evt.stopPropagation();
+      activeCalTaskId = (activeCalTaskId === taskId) ? null : taskId;
+      renderCourses();
+    }
+
+    function buildGoogleCalUrl(title, dateIso, details) {
+      const parts = dateIso.split("-").map(Number);
+      const startDt = new Date(parts[0], parts[1] - 1, parts[2]);
+      const endDt = new Date(parts[0], parts[1] - 1, parts[2] + 1);
+      const fmt = (d) =>
+        d.getFullYear().toString() +
+        String(d.getMonth() + 1).padStart(2, "0") +
+        String(d.getDate()).padStart(2, "0");
+      const datesParam = fmt(startDt) + "/" + fmt(endDt);
+      return (
+        "https://calendar.google.com/calendar/render?action=TEMPLATE" +
+        "&text=" + encodeURIComponent(title) +
+        "&dates=" + encodeURIComponent(datesParam) +
+        "&details=" + encodeURIComponent(details)
+      );
+    }
+
+    function getQuickDates() {
+      const now = new Date();
+      const toIso = (d) =>
+        d.getFullYear() + "-" +
+        String(d.getMonth() + 1).padStart(2, "0") + "-" +
+        String(d.getDate()).padStart(2, "0");
+
+      const tmrw = new Date(now);
+      tmrw.setDate(now.getDate() + 1);
+
+      const dayOfWeek = now.getDay();
+      const diffToFri = dayOfWeek <= 5 ? (5 - dayOfWeek) : 0;
+      const fri = new Date(now);
+      fri.setDate(now.getDate() + diffToFri);
+
+      const diffToSun = dayOfWeek === 0 ? 0 : (7 - dayOfWeek);
+      const sun = new Date(now);
+      sun.setDate(now.getDate() + diffToSun);
+
+      return [
+        { label: "Today", iso: toIso(now) },
+        { label: "Tomorrow", iso: toIso(tmrw) },
+        { label: "Friday", iso: toIso(fri) },
+        { label: "Sunday (EOW)", iso: toIso(sun) },
+      ];
+    }
+
+    function openTaskGoogleCal(evt, courseId, taskId, dateIso) {
+      evt.stopPropagation();
+      if (!dateIso) return;
+      const course = CONFIG.courses.find(c => c.id === courseId);
+      if (!course) return;
+      const allTasks = [...course.weekly_tasks, ...course.next_up];
+      const task = allTasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      const title = `FLVS ${course.name}: ${task.title}`;
+      const pwLine = (course.passwords && course.passwords.length > 0)
+        ? "\nUnlocked Passwords: " + course.passwords.map(p => `${p.label}: ${p.value}`).join(" | ")
+        : "";
+      const details =
+        `Course: ${course.name} (${course.segment})\n` +
+        `Assignment: ${task.title} (${task.type})\n` +
+        `Teacher: ${course.teacher_name} (${course.teacher_phone} · ${course.teacher_email})` +
+        pwLine +
+        `\n\nOpen Course (sign in to vsa.flvs.net first): ${course.course_url}`;
+
+      const url = buildGoogleCalUrl(title, dateIso, details);
+      window.open(url, "_blank", "noopener");
+      activeCalTaskId = null;
+      renderCourses();
+    }
+
+    function openDbaGoogleCal(courseId) {
+      const course = CONFIG.courses.find(c => c.id === courseId);
+      if (!course) return;
+      const savedDba = (appState.dbaDates[courseId] || "").trim();
+      const savedNote = (appState.courseNotes[courseId] || "").trim();
+      const title = `FLVS ${course.name} — DBA / Call with ${course.teacher_name}` + (savedDba ? ` (${savedDba})` : "");
+      const details =
+        `Scheduled Time: ${savedDba || "Set time in Google Calendar"}\n` +
+        `Teacher: ${course.teacher_name}\n` +
+        `Phone: ${course.teacher_phone} · Email: ${course.teacher_email}\n` +
+        (course.dba_url ? `Booking / Meeting Link: ${course.dba_url}\n` : "") +
+        (savedNote ? `My Notes: ${savedNote}\n` : "");
+
+      const todayIso = getQuickDates()[0].iso;
+      const url = buildGoogleCalUrl(title, todayIso, details);
+      window.open(url, "_blank", "noopener");
+    }
 
     function loadInitialState() {
       try {
@@ -705,35 +821,67 @@
       document.getElementById("progress-bar-fill").style.width = pct + "%";
     }
 
-    function renderTaskRow(t) {
+    function renderTaskRow(c, t) {
       const isChecked = !!appState.checked[t.id];
       if (currentFilter === 'todo' && isChecked) return '';
       if (currentFilter === 'done' && !isChecked) return '';
 
       const flvsDone = t.flvs_done;
+      const showCal = activeCalTaskId === t.id;
+      const quickDates = getQuickDates();
 
       return `
-        <div onclick="toggleTask('${t.id}')"
-          class="task-item cursor-pointer py-3 px-2 -mx-2 rounded-lg flex items-start justify-between gap-3 select-none">
-          <div class="flex items-start gap-3 min-w-0">
-            <button type="button" aria-label="Toggle task"
-              class="mt-0.5 w-5 h-5 rounded flex items-center justify-center border transition shrink-0"
-              style="${isChecked
-                ? 'background-color: var(--accent); border-color: var(--accent); color: #fff;'
-                : 'border-color: var(--text-muted); background-color: transparent;'}">
-              ${isChecked ? '<svg class="w-3.5 h-3.5 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
-            </button>
-            <div class="min-w-0">
-              <div class="text-sm font-medium leading-snug ${isChecked ? 'line-through text-muted' : ''}">
-                ${escapeHtml(t.title)}
+        <div class="py-3 px-2 -mx-2 rounded-lg task-item select-none">
+          <div onclick="toggleTask('${t.id}')" class="cursor-pointer flex items-start justify-between gap-3">
+            <div class="flex items-start gap-3 min-w-0">
+              <button type="button" aria-label="Toggle task"
+                class="mt-0.5 w-5 h-5 rounded flex items-center justify-center border transition shrink-0"
+                style="${isChecked
+                  ? 'background-color: var(--accent); border-color: var(--accent); color: #fff;'
+                  : 'border-color: var(--text-muted); background-color: transparent;'}">
+                ${isChecked ? '<svg class="w-3.5 h-3.5 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
+              </button>
+              <div class="min-w-0">
+                <div class="text-sm font-medium leading-snug ${isChecked ? 'line-through text-muted' : ''}">
+                  ${escapeHtml(t.title)}
+                </div>
+                ${t.badge ? `<div class="text-xs font-medium text-rose-600 dark:text-rose-400 mt-0.5">${escapeHtml(t.badge)}</div>` : ''}
+                ${flvsDone ? `<div class="text-xs font-mono-num text-emerald-700 dark:text-emerald-400 mt-0.5">Submitted in FLVS (${escapeHtml(flvsDone.score)})</div>` : ''}
               </div>
-              ${t.badge ? `<div class="text-xs font-medium text-rose-600 dark:text-rose-400 mt-0.5">${escapeHtml(t.badge)}</div>` : ''}
-              ${flvsDone ? `<div class="text-xs font-mono-num text-emerald-700 dark:text-emerald-400 mt-0.5">Submitted in FLVS (${escapeHtml(flvsDone.score)})</div>` : ''}
+            </div>
+            <div class="flex items-center gap-2.5 shrink-0 pt-0.5">
+              <span class="text-xs font-mono-num text-muted">
+                ${escapeHtml(t.type)}
+              </span>
+              <button type="button" onclick="toggleCalPicker(event, '${t.id}')"
+                title="Add due date to Google Calendar"
+                class="text-xs font-mono-num px-2 py-0.5 rounded border text-muted hover:opacity-80 transition"
+                style="border-color: var(--border-subtle)">
+                + Cal
+              </button>
             </div>
           </div>
-          <span class="text-xs font-mono-num text-muted shrink-0 pt-0.5">
-            ${escapeHtml(t.type)}
-          </span>
+
+          ${showCal ? `
+            <div onclick="event.stopPropagation()" class="mt-2.5 ml-8 p-2.5 rounded-lg flex flex-wrap items-center justify-between gap-2 text-xs" style="background-color: var(--bg-canvas); border: 1px solid var(--border-subtle)">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-muted mr-1">Add to Google Calendar on:</span>
+                ${quickDates.map(qd => `
+                  <button type="button" onclick="openTaskGoogleCal(event, '${c.id}', '${t.id}', '${qd.iso}')"
+                    class="px-2 py-1 rounded card-surface font-medium hover:opacity-80 transition">
+                    ${qd.label}
+                  </button>
+                `).join("")}
+                <input type="date" value="${quickDates[3].iso}"
+                  onchange="openTaskGoogleCal(event, '${c.id}', '${t.id}', this.value)"
+                  class="px-2 py-0.5 rounded text-xs font-mono-num"
+                  title="Pick custom date" />
+              </div>
+              <button type="button" onclick="toggleCalPicker(event, '${t.id}')" class="text-muted hover:underline">
+                Cancel
+              </button>
+            </div>
+          ` : ''}
         </div>
       `;
     }
@@ -745,8 +893,8 @@
       for (const c of CONFIG.courses) {
         const cTotal = c.weekly_tasks.length;
         const cDone = c.weekly_tasks.filter(t => !!appState.checked[t.id]).length;
-        const tasksHtml = c.weekly_tasks.map(t => renderTaskRow(t)).join("");
-        const nextUpHtml = c.next_up.map(t => renderTaskRow(t)).join("");
+        const tasksHtml = c.weekly_tasks.map(t => renderTaskRow(c, t)).join("");
+        const nextUpHtml = c.next_up.map(t => renderTaskRow(c, t)).join("");
 
         const savedNote = (appState.courseNotes[c.id] || "").trim();
         const savedDba = (appState.dbaDates[c.id] || "").trim();
@@ -794,15 +942,15 @@
             <!-- Action Links & Unlocked Passwords Row -->
             <div class="flex flex-wrap items-center justify-between gap-2 pt-1 hairline-bottom pb-3">
               <div class="flex flex-wrap items-center gap-2 text-xs font-medium">
-                <a href="${c.course_url}" target="_blank" rel="noopener"
+                <a href="${c.course_url}" target="flvs_course_${c.id}" onclick="markCourseInitialized('${c.id}')"
                   class="accent-btn px-3 py-1.5 rounded-lg transition active:scale-95">
                   Open Class
                 </a>
-                <a href="${c.grades_url}" target="_blank" rel="noopener"
+                <button type="button" onclick="openGradebook('${c.id}', '${escapeAttr(c.course_url)}', '${escapeAttr(c.grades_url)}')"
                   class="px-3 py-1.5 rounded-lg border hover:opacity-80 transition"
                   style="border-color: var(--border-subtle)">
                   Gradebook
-                </a>
+                </button>
                 ${c.dba_url ? `
                   <a href="${c.dba_url}" target="_blank" rel="noopener"
                     class="px-3 py-1.5 rounded-lg border hover:opacity-80 transition"
@@ -853,7 +1001,14 @@
               ${showNotesArea ? `
                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 pt-1">
                   <div class="sm:col-span-5">
-                    <label class="block text-xs text-muted mb-1">Scheduled DBA / Call Time</label>
+                    <div class="flex items-center justify-between mb-1">
+                      <label class="text-xs text-muted">Scheduled DBA / Call Time</label>
+                      <button type="button" onclick="openDbaGoogleCal('${c.id}')"
+                        class="text-[11px] font-mono-num underline hover:opacity-80"
+                        style="color: var(--accent)">
+                        + Google Cal
+                      </button>
+                    </div>
                     <input type="text" value="${escapeAttr(appState.dbaDates[c.id] || '')}"
                       placeholder="e.g. Thu 2:00 PM"
                       oninput="onCourseDbaInput('${c.id}', this.value)"
