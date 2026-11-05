@@ -135,10 +135,18 @@
           <div class="text-muted">
             Step 1: Sign in to FLVS VSA as <button type="button" onclick="copyText('ATD09', 'Copied ATD09')" class="font-mono-num font-semibold underline decoration-dotted hover:opacity-80" style="color: var(--text-primary)">ATD09</button> first so class links open directly.
           </div>
-          <a href="https://vsa.flvs.net/" target="_blank" rel="noopener"
-            class="accent-btn font-medium px-3.5 py-1.5 rounded-lg inline-flex items-center gap-1.5 transition active:scale-[0.98]">
-            <span>Sign In to FLVS VSA</span>
-          </a>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" onclick="openWeeklySummaryGoogleCal()"
+              class="px-3 py-1.5 rounded-lg border font-medium inline-flex items-center gap-1.5 hover:opacity-80 transition"
+              style="border-color: var(--border-subtle)">
+              <svg class="w-3.5 h-3.5 shrink-0" style="color: var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              <span>Add Week’s Due Date to Google Calendar</span>
+            </button>
+            <a href="https://vsa.flvs.net/" target="_blank" rel="noopener"
+              class="accent-btn font-medium px-3.5 py-1.5 rounded-lg inline-flex items-center gap-1.5 transition active:scale-[0.98]">
+              <span>Sign In to FLVS VSA</span>
+            </a>
+          </div>
         </div>
       </div>
 
@@ -636,6 +644,23 @@
       window.open(url, "_blank", "noopener");
     }
 
+    function openWeeklySummaryGoogleCal() {
+      const sunIso = getQuickDates()[3].iso;
+      const title = `FLVS Weekly Checklist Due (${CONFIG.name} — ${CONFIG.week_range})`;
+      let detailsLines = [`Weekly FLVS Target Checklist for ${CONFIG.name} (${CONFIG.week_range}):`, ""];
+      for (const c of CONFIG.courses) {
+        detailsLines.push(`${c.name} (${c.teacher_name} · ${c.teacher_phone}):`);
+        for (const t of c.weekly_tasks) {
+          const done = appState.checked[t.id] ? "[Done] " : "[To Do] ";
+          detailsLines.push(`  - ${done}${t.title} (${t.type})`);
+        }
+        detailsLines.push("");
+      }
+      detailsLines.push(`Open Weekly Dashboard: https://sarahrdickson.github.io/flvs/${CONFIG.key}`);
+      const url = buildGoogleCalUrl(title, sunIso, detailsLines.join("\n"));
+      window.open(url, "_blank", "noopener");
+    }
+
     function loadInitialState() {
       try {
         const savedTheme = localStorage.getItem("flvs_theme_" + CONFIG.key);
@@ -849,36 +874,38 @@
                 ${flvsDone ? `<div class="text-xs font-mono-num text-emerald-700 dark:text-emerald-400 mt-0.5">Submitted in FLVS (${escapeHtml(flvsDone.score)})</div>` : ''}
               </div>
             </div>
-            <div class="flex items-center gap-2.5 shrink-0 pt-0.5">
+            <div class="flex flex-wrap items-center gap-2 shrink-0 pt-0.5">
               <span class="text-xs font-mono-num text-muted">
                 ${escapeHtml(t.type)}
               </span>
               <button type="button" onclick="toggleCalPicker(event, '${t.id}')"
-                title="Add due date to Google Calendar"
-                class="text-xs font-mono-num px-2 py-0.5 rounded border text-muted hover:opacity-80 transition"
-                style="border-color: var(--border-subtle)">
-                + Cal
+                class="text-xs font-medium px-2.5 py-1 rounded-md border inline-flex items-center gap-1.5 hover:opacity-85 transition"
+                style="border-color: var(--border-subtle); background-color: var(--bg-canvas); color: var(--text-primary)">
+                <svg class="w-3.5 h-3.5 shrink-0" style="color: var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <span>Add to Google Calendar</span>
               </button>
             </div>
           </div>
 
           ${showCal ? `
-            <div onclick="event.stopPropagation()" class="mt-2.5 ml-8 p-2.5 rounded-lg flex flex-wrap items-center justify-between gap-2 text-xs" style="background-color: var(--bg-canvas); border: 1px solid var(--border-subtle)">
-              <div class="flex flex-wrap items-center gap-1.5">
-                <span class="text-muted mr-1">Add to Google Calendar on:</span>
+            <div onclick="event.stopPropagation()" class="mt-2.5 ml-8 p-3 rounded-lg flex flex-wrap items-center justify-between gap-2 text-xs" style="background-color: var(--bg-canvas); border: 1px solid var(--border-subtle)">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="font-medium" style="color: var(--text-primary)">Pick a day to put this on your Google Calendar:</span>
                 ${quickDates.map(qd => `
                   <button type="button" onclick="openTaskGoogleCal(event, '${c.id}', '${t.id}', '${qd.iso}')"
-                    class="px-2 py-1 rounded card-surface font-medium hover:opacity-80 transition">
+                    class="px-2.5 py-1 rounded-md accent-btn font-medium transition active:scale-95">
                     ${qd.label}
                   </button>
                 `).join("")}
-                <input type="date" value="${quickDates[3].iso}"
-                  onchange="openTaskGoogleCal(event, '${c.id}', '${t.id}', this.value)"
-                  class="px-2 py-0.5 rounded text-xs font-mono-num"
-                  title="Pick custom date" />
+                <label class="inline-flex items-center gap-1.5 text-muted ml-1">
+                  <span>Or pick date:</span>
+                  <input type="date" value="${quickDates[3].iso}"
+                    onchange="openTaskGoogleCal(event, '${c.id}', '${t.id}', this.value)"
+                    class="px-2 py-1 rounded-md text-xs font-mono-num" />
+                </label>
               </div>
               <button type="button" onclick="toggleCalPicker(event, '${t.id}')" class="text-muted hover:underline">
-                Cancel
+                Close
               </button>
             </div>
           ` : ''}
@@ -1004,9 +1031,9 @@
                     <div class="flex items-center justify-between mb-1">
                       <label class="text-xs text-muted">Scheduled DBA / Call Time</label>
                       <button type="button" onclick="openDbaGoogleCal('${c.id}')"
-                        class="text-[11px] font-mono-num underline hover:opacity-80"
+                        class="text-xs font-medium underline hover:opacity-80"
                         style="color: var(--accent)">
-                        + Google Cal
+                        Add DBA to Google Calendar
                       </button>
                     </div>
                     <input type="text" value="${escapeAttr(appState.dbaDates[c.id] || '')}"
